@@ -1,0 +1,28 @@
+.env
+target/
+node_modules/
+dist/
+
+# JVM 崩溃转储与本地日志
+hs_err_pid*.log
+replay_pid*.log
+*.log
+
+# 本地编辑器/助手配置，不属于工程产物
+.cursor/
+
+# Eclipse / IDEA 工程文件
+.classpath
+.project
+.settings/
+*.iml
+
+.idea/*
+!.idea/misc.xml
+!.idea/modules.xml
+!.idea/eventflow-parent.iml
+!.idea/sqldialects.xml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+backend/data/

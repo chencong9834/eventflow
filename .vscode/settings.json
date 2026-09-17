@@ -1,0 +1,23 @@
+{
+  "java.import.maven.enabled": true,
+  "java.import.gradle.enabled": false,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.project.importOnFirstTimeStartup": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.maven.userSettings": "${workspaceFolder}/.mvn/settings.xml",
+  "maven.settingsFile": "${workspaceFolder}/.mvn/settings.xml",
+  "maven.view": "hierarchical",
+  "maven.terminal.useWrapper": false,
+  "java.jdt.ls.pomFileTimeout": 180,
+  "java.project.sourcePaths": [
+    "backend/src/main/java"
+  ],
+  "java.project.outputPath": "backend/target/classes",
+  "java.import.generatesMetadataFilesAtProjectRoot": true,
+  "files.exclude": {
+    "backend/data": true,
+    "backend/target": true,
+    "web/node_modules": true,
+    "web/dist": true
+  }
+}

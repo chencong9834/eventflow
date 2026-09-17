@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: eventflow
+  profiles:
+    default: local
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+  flyway:
+    encoding: UTF-8
+    locations: classpath:db/migration
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:eventflow}?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+    username: ${MYSQL_USER:eventflow}
+    password: ${MYSQL_PASSWORD:eventflow}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      # 默认 10 个连接在下单/支付这种"一个请求一个事务"的写路径上会成为瓶颈：
+      # 压测中 50 并发时请求平均占用连接约 250ms，10 连接封顶约 40 req/s。
+      maximum-pool-size: ${HIKARI_MAX_POOL:32}
+      minimum-idle: 8
+      connection-timeout: 10000
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      repositories:
+        enabled: false
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:eventflow}
+    password: ${RABBITMQ_PASSWORD:eventflow}
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+  type-aliases-package: com.example.eventflow
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: eventflow
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+eventflow:
+  jwt:
+    secret: ${EVENTFLOW_JWT_SECRET:local-dev-only-change-me-eventflow-hs256-key-32b}
+    expire-seconds: 86400
+  auth:
+    login-max-failures: 5
+    login-window-seconds: 900
+    login-max-attempts-per-ip: 30
+  order:
+    pay-timeout-seconds: 900
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+eventflow:
+  jwt:
+    secret: "test-secret-eventflow-hs256-key-must-be-long"
+    expire-seconds: 3600
+  auth:
+    login-max-failures: 5
+    login-window-seconds: 900
+    login-max-attempts-per-ip: 30

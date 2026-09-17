@@ -1,0 +1,115 @@
+# 默认只起核心中间件（适合 8GB 内存本机）：
+#   docker compose up -d
+# 监控：
+#   docker compose --profile obs up -d
+# 网关：
+#   docker compose --profile proxy up -d
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: eventflow-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: eventflow
+      MYSQL_USER: eventflow
+      MYSQL_PASSWORD: eventflow
+      MYSQL_ROOT_PASSWORD: eventflow-root
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+00:00
+    volumes:
+      - eventflow-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ueventflow", "-peventflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 512m
+
+  redis:
+    image: redis:7-alpine
+    container_name: eventflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - eventflow-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    mem_limit: 128m
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: eventflow-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: eventflow
+      RABBITMQ_DEFAULT_PASS: eventflow
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - eventflow-rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    mem_limit: 400m
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: eventflow-prometheus
+    profiles: ["obs"]
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    mem_limit: 256m
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: eventflow-grafana
+    profiles: ["obs"]
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - eventflow-grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    mem_limit: 256m
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: eventflow-nginx
+    profiles: ["proxy"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  eventflow-mysql:
+  eventflow-redis:
+  eventflow-rabbitmq:
+  eventflow-grafana:
