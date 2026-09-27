@@ -1,8 +1,8 @@
 package com.example.eventflow.iam;
 
+import cn.hutool.core.lang.Snowflake;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
-import com.example.eventflow.shared.id.SnowflakeIdGenerator;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,13 +14,13 @@ public class RoleTemplateService {
   private final SysRoleTemplateMapper templateMapper;
   private final SysRoleMapper roleMapper;
   private final RolePermissionMapper rolePermissionMapper;
-  private final SnowflakeIdGenerator ids;
+  private final Snowflake ids;
 
   public RoleTemplateService(
       SysRoleTemplateMapper templateMapper,
       SysRoleMapper roleMapper,
       RolePermissionMapper rolePermissionMapper,
-      SnowflakeIdGenerator ids) {
+      Snowflake ids) {
     this.templateMapper = templateMapper;
     this.roleMapper = roleMapper;
     this.rolePermissionMapper = rolePermissionMapper;

@@ -1,5 +1,6 @@
 package com.example.eventflow.tenant;
 
+import cn.hutool.core.lang.Snowflake;
 import com.example.eventflow.iam.RolePermissionMapper;
 import com.example.eventflow.iam.RoleTemplateService;
 import com.example.eventflow.iam.SysRole;
@@ -12,7 +13,6 @@ import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
-import com.example.eventflow.shared.id.SnowflakeIdGenerator;
 import com.example.eventflow.tenant.web.CreateOrganizerTenantRequest;
 import com.example.eventflow.tenant.web.PlatformOverviewResponse;
 import com.example.eventflow.tenant.web.TenantDetailResponse;
@@ -41,7 +41,7 @@ public class TenantService {
   private final RolePermissionMapper rolePermissionMapper;
   private final SysUserMapper userMapper;
   private final RoleTemplateService roleTemplateService;
-  private final SnowflakeIdGenerator ids;
+  private final Snowflake ids;
   private final PasswordEncoder passwordEncoder;
   private final ActivityService activityService;
 
@@ -51,7 +51,7 @@ public class TenantService {
       RolePermissionMapper rolePermissionMapper,
       SysUserMapper userMapper,
       RoleTemplateService roleTemplateService,
-      SnowflakeIdGenerator ids,
+      Snowflake ids,
       PasswordEncoder passwordEncoder,
       ActivityService activityService) {
     this.tenantMapper = tenantMapper;

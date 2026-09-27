@@ -1,5 +1,6 @@
 package com.example.eventflow.activity;
 
+import cn.hutool.core.lang.Snowflake;
 import com.example.eventflow.activity.web.ActivitySummaryResponse;
 import com.example.eventflow.activity.web.ActivitySummaryResponse.ActivityDetailResponse;
 import com.example.eventflow.activity.web.ActivitySummaryResponse.AuditLogResponse;
@@ -23,12 +24,10 @@ import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
-import com.example.eventflow.shared.id.SnowflakeIdGenerator;
 import com.example.eventflow.shared.security.AuthPrincipal;
 import com.example.eventflow.shared.time.Utc;
 import com.example.eventflow.tenant.TenantService;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -53,7 +52,7 @@ public class ActivityService {
   private final AuditOperationLogMapper auditMapper;
   private final SiteNoticeMapper noticeMapper;
   private final SysUserMapper userMapper;
-  private final SnowflakeIdGenerator ids;
+  private final Snowflake ids;
   private final Clock clock;
 
   public ActivityService(
@@ -65,7 +64,7 @@ public class ActivityService {
       AuditOperationLogMapper auditMapper,
       SiteNoticeMapper noticeMapper,
       SysUserMapper userMapper,
-      SnowflakeIdGenerator ids,
+      Snowflake ids,
       Clock clock) {
     this.activityMapper = activityMapper;
     this.showMapper = showMapper;

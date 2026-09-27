@@ -1,5 +1,6 @@
 package com.example.eventflow.order;
 
+import cn.hutool.core.lang.Snowflake;
 import com.example.eventflow.activity.Activity;
 import com.example.eventflow.activity.ActivityMapper;
 import com.example.eventflow.activity.ActivityService;
@@ -24,7 +25,6 @@ import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
-import com.example.eventflow.shared.id.SnowflakeIdGenerator;
 import com.example.eventflow.shared.outbox.OutboxEvent;
 import com.example.eventflow.shared.outbox.OutboxMapper;
 import com.example.eventflow.shared.security.AuthPrincipal;
@@ -69,7 +69,7 @@ public class OrderService {
   private final OutboxMapper outboxMapper;
   private final SiteNoticeMapper noticeMapper;
   private final SysUserMapper userMapper;
-  private final SnowflakeIdGenerator ids;
+  private final Snowflake ids;
   private final OrderProperties orderProperties;
   private final Clock clock;
 
@@ -86,7 +86,7 @@ public class OrderService {
       OutboxMapper outboxMapper,
       SiteNoticeMapper noticeMapper,
       SysUserMapper userMapper,
-      SnowflakeIdGenerator ids,
+      Snowflake ids,
       OrderProperties orderProperties,
       Clock clock) {
     this.orderMapper = orderMapper;
