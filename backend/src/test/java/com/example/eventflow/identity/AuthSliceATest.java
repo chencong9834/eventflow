@@ -81,7 +81,20 @@ class AuthSliceATest {
     mockMvc
         .perform(get("/api/platform/tenants").header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data[*].tenantCode", hasItems("platform", "buyer", "org-demo")));
+        .andExpect(jsonPath("$.data.items[*].tenantCode", hasItems("platform", "buyer", "org-demo")));
+  }
+
+  @Test
+  void listRejectsInvalidPage() throws Exception {
+    String token = login("platform", "Passw0rd!");
+    mockMvc
+        .perform(get("/api/platform/tenants").param("page", "0").header("Authorization", "Bearer " + token))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
+    mockMvc
+        .perform(get("/api/platform/tenants").param("size", "101").header("Authorization", "Bearer " + token))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
   }
 
   @Test

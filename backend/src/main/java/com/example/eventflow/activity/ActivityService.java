@@ -18,6 +18,9 @@ import com.example.eventflow.inventory.InventoryMapper;
 import com.example.eventflow.inventory.RedisStockService;
 import com.example.eventflow.notification.SiteNotice;
 import com.example.eventflow.notification.SiteNoticeMapper;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
+import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
 import com.example.eventflow.shared.id.SnowflakeIdGenerator;
@@ -80,22 +83,17 @@ public class ActivityService {
     return activityMapper.countByReviewStatus(PENDING);
   }
 
-  public List<ActivitySummaryResponse> listMine(AuthPrincipal principal) {
+  public PageResult<ActivitySummaryResponse> listMine(AuthPrincipal principal, PageQuery page) {
     requireOrganizer(principal);
-    List<ActivitySummaryResponse> rows = new ArrayList<>();
-    for (Activity activity : activityMapper.findByTenant(principal.getTenantId())) {
-      rows.add(toSummary(activity));
-    }
-    return rows;
+    return PageSupport.query(
+        page,
+        () -> activityMapper.findByTenant(principal.getTenantId()),
+        ActivityService::toSummary);
   }
 
-  public List<ActivitySummaryResponse> listForReview(String reviewStatus) {
+  public PageResult<ActivitySummaryResponse> listForReview(String reviewStatus, PageQuery page) {
     String status = reviewStatus == null || reviewStatus.isBlank() ? PENDING : reviewStatus;
-    List<ActivitySummaryResponse> rows = new ArrayList<>();
-    for (Activity activity : activityMapper.findByReviewStatus(status)) {
-      rows.add(toSummary(activity));
-    }
-    return rows;
+    return PageSupport.query(page, () -> activityMapper.findByReviewStatus(status), ActivityService::toSummary);
   }
 
   public ActivityDetailResponse getMine(AuthPrincipal principal, Long activityId) {
@@ -112,12 +110,9 @@ public class ActivityService {
     return toDetail(activity, true);
   }
 
-  public List<ActivitySummaryResponse> listCatalog() {
-    List<ActivitySummaryResponse> rows = new ArrayList<>();
-    for (Activity activity : activityMapper.findOnSaleCatalog(Utc.now(clock))) {
-      rows.add(toSummary(activity));
-    }
-    return rows;
+  public PageResult<ActivitySummaryResponse> listCatalog(PageQuery page) {
+    java.time.LocalDateTime now = Utc.now(clock);
+    return PageSupport.query(page, () -> activityMapper.findOnSaleCatalog(now), ActivityService::toSummary);
   }
 
   public ActivityDetailResponse getCatalog(Long activityId) {

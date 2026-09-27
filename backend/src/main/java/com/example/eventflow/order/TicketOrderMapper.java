@@ -27,10 +27,20 @@ public interface TicketOrderMapper {
   @Select("SELECT * FROM ticket_order WHERE id = #{id}")
   TicketOrder findById(@Param("id") Long id);
 
-  @Select("SELECT * FROM ticket_order WHERE buyer_user_id = #{buyerUserId} ORDER BY created_at DESC")
+  @Select(
+      """
+      SELECT * FROM ticket_order
+      WHERE buyer_user_id = #{buyerUserId}
+      ORDER BY created_at DESC
+      """)
   List<TicketOrder> findByBuyer(@Param("buyerUserId") Long buyerUserId);
 
-  @Select("SELECT * FROM ticket_order WHERE tenant_id = #{tenantId} ORDER BY created_at DESC")
+  @Select(
+      """
+      SELECT * FROM ticket_order
+      WHERE tenant_id = #{tenantId}
+      ORDER BY created_at DESC
+      """)
   List<TicketOrder> findByTenant(@Param("tenantId") Long tenantId);
 
   @Select(
@@ -60,7 +70,6 @@ public interface TicketOrderMapper {
       SELECT * FROM ticket_order
       WHERE created_at >= #{from} AND created_at < #{to}
       ORDER BY created_at DESC
-      LIMIT 200
       """)
   List<TicketOrder> findInRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

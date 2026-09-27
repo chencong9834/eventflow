@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http } from "../../shared/http";
+import { listPagination } from "../../shared/page";
 import { fenToYuan, fromDatetimeLocal, orderLabel, toDatetimeLocal } from "../../shared/format";
-import type { ApiResponse, Order } from "../../shared/types";
+import type { ApiResponse, Order, PageResult } from "../../shared/types";
 
 function defaultRange() {
   const to = new Date();
@@ -19,13 +20,17 @@ export function PlatformOrdersPage() {
   const initial = useMemo(() => defaultRange(), []);
   const [fromLocal, setFromLocal] = useState(initial.from);
   const [toLocal, setToLocal] = useState(initial.to);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
   const from = fromDatetimeLocal(fromLocal);
   const to = fromDatetimeLocal(toLocal);
   const query = useQuery({
-    queryKey: ["platform", "orders", from, to],
+    queryKey: ["platform", "orders", from, to, page, size],
     enabled: Boolean(from && to),
     queryFn: async () => {
-      const res = (await http.get("/platform/orders", { params: { from, to } })) as ApiResponse<Order[]>;
+      const res = (await http.get("/platform/orders", { params: { from, to, page, size } })) as ApiResponse<
+        PageResult<Order>
+      >;
       return res.data;
     }
   });
@@ -37,18 +42,36 @@ export function PlatformOrdersPage() {
           跨租户订单
         </Typography.Title>
         <Space>
-          <Input type="datetime-local" value={fromLocal} onChange={(e) => setFromLocal(e.target.value)} />
+          <Input
+            type="datetime-local"
+            value={fromLocal}
+            onChange={(e) => {
+              setFromLocal(e.target.value);
+              setPage(1);
+            }}
+          />
           <span>至</span>
-          <Input type="datetime-local" value={toLocal} onChange={(e) => setToLocal(e.target.value)} />
+          <Input
+            type="datetime-local"
+            value={toLocal}
+            onChange={(e) => {
+              setToLocal(e.target.value);
+              setPage(1);
+            }}
+          />
         </Space>
       </Space>
       <Typography.Paragraph type="secondary">
-        按创建时间查询，最多 200 条。客服可对已支付且未核销的订单做整单退款。
+        按创建时间分页查询。客服可对已支付且未核销的订单做整单退款。
       </Typography.Paragraph>
       <Table
         rowKey="id"
         loading={query.isLoading}
-        dataSource={query.data ?? []}
+        dataSource={query.data?.items ?? []}
+        pagination={listPagination(page, size, query.data?.total ?? 0, (nextPage, nextSize) => {
+          setPage(nextPage);
+          setSize(nextSize);
+        })}
         columns={[
           { title: "单号", dataIndex: "orderNo" },
           { title: "活动", dataIndex: "activityTitle" },

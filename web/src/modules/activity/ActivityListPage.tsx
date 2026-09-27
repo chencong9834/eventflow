@@ -1,20 +1,26 @@
 import { Button, Card, Space, Table, Tag, Typography, message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http, ApiError } from "../../shared/http";
+import { listPagination } from "../../shared/page";
 import { reviewLabel, saleLabel } from "../../shared/format";
-import type { ActivitySummary, ApiResponse } from "../../shared/types";
+import type { ActivitySummary, ApiResponse, PageResult } from "../../shared/types";
 import { useAuth } from "../../auth/AuthProvider";
 
 export function ActivityListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
   const canWrite = (user?.permissions ?? []).includes("activity:write");
   const query = useQuery({
-    queryKey: ["organizer", "activities"],
+    queryKey: ["organizer", "activities", page, size],
     queryFn: async () => {
-      const res = (await http.get("/organizer/activities")) as ApiResponse<ActivitySummary[]>;
+      const res = (await http.get("/organizer/activities", { params: { page, size } })) as ApiResponse<
+        PageResult<ActivitySummary>
+      >;
       return res.data;
     }
   });
@@ -48,7 +54,11 @@ export function ActivityListPage() {
       <Table
         rowKey="id"
         loading={query.isLoading}
-        dataSource={query.data ?? []}
+        dataSource={query.data?.items ?? []}
+        pagination={listPagination(page, size, query.data?.total ?? 0, (nextPage, nextSize) => {
+          setPage(nextPage);
+          setSize(nextSize);
+        })}
         columns={[
           { title: "标题", dataIndex: "title" },
           {

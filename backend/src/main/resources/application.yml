@@ -33,6 +33,10 @@ spring:
     username: ${RABBITMQ_USER:eventflow}
     password: ${RABBITMQ_PASSWORD:eventflow}
 
+pagehelper:
+  helper-dialect: mysql
+  reasonable: false
+
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

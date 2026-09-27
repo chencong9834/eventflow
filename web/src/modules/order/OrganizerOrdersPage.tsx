@@ -1,16 +1,20 @@
 import { Button, Card, Table, Tag } from "antd";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http } from "../../shared/http";
+import { listPagination } from "../../shared/page";
 import { fenToYuan, orderLabel } from "../../shared/format";
-import type { ApiResponse, Order } from "../../shared/types";
+import type { ApiResponse, Order, PageResult } from "../../shared/types";
 
 export function OrganizerOrdersPage() {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
   const query = useQuery({
-    queryKey: ["organizer", "orders"],
+    queryKey: ["organizer", "orders", page, size],
     queryFn: async () => {
-      const res = (await http.get("/organizer/orders")) as ApiResponse<Order[]>;
+      const res = (await http.get("/organizer/orders", { params: { page, size } })) as ApiResponse<PageResult<Order>>;
       return res.data;
     }
   });
@@ -19,7 +23,11 @@ export function OrganizerOrdersPage() {
       <Table
         rowKey="id"
         loading={query.isLoading}
-        dataSource={query.data ?? []}
+        dataSource={query.data?.items ?? []}
+        pagination={listPagination(page, size, query.data?.total ?? 0, (nextPage, nextSize) => {
+          setPage(nextPage);
+          setSize(nextSize);
+        })}
         columns={[
           { title: "单号", dataIndex: "orderNo" },
           { title: "活动", dataIndex: "activityTitle" },

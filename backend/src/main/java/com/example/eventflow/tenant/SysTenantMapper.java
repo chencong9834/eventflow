@@ -13,6 +13,9 @@ public interface SysTenantMapper {
   @Select("SELECT * FROM sys_tenant WHERE id = #{id}")
   SysTenant findById(Long id);
 
+  @Select("SELECT COUNT(*) FROM sys_tenant")
+  int countAll();
+
   @Select("SELECT * FROM sys_tenant ORDER BY id")
   List<SysTenant> findAll();
 

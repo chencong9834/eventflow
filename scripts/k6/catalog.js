@@ -52,7 +52,7 @@ export default function (data) {
     return;
   }
 
-  const activities = list.json("data") || [];
+  const activities = list.json("data.items") || [];
   if (activities.length === 0) {
     return;
   }

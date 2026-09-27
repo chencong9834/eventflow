@@ -16,6 +16,11 @@ public interface SiteNoticeMapper {
       """)
   int insert(SiteNotice notice);
 
-  @Select("SELECT * FROM site_notice WHERE user_id = #{userId} ORDER BY created_at DESC LIMIT 50")
+  @Select(
+      """
+      SELECT * FROM site_notice
+      WHERE user_id = #{userId}
+      ORDER BY created_at DESC
+      """)
   List<SiteNotice> findByUser(@Param("userId") Long userId);
 }

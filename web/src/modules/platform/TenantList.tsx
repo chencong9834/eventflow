@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { http, ApiError } from "../../shared/http";
-import type { ApiResponse, Tenant } from "../../shared/types";
+import { listPagination } from "../../shared/page";
+import type { ApiResponse, PageResult, Tenant } from "../../shared/types";
 
 const schema = z.object({
   tenantCode: z
@@ -28,10 +29,12 @@ export function TenantList() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
   const query = useQuery({
-    queryKey: ["platform", "tenants"],
+    queryKey: ["platform", "tenants", page, size],
     queryFn: async () => {
-      const res = (await http.get("/platform/tenants")) as ApiResponse<Tenant[]>;
+      const res = (await http.get("/platform/tenants", { params: { page, size } })) as ApiResponse<PageResult<Tenant>>;
       return res.data;
     }
   });
@@ -100,7 +103,11 @@ export function TenantList() {
       <Table
         rowKey="id"
         loading={query.isLoading}
-        dataSource={query.data ?? []}
+        dataSource={query.data?.items ?? []}
+        pagination={listPagination(page, size, query.data?.total ?? 0, (nextPage, nextSize) => {
+          setPage(nextPage);
+          setSize(nextSize);
+        })}
         columns={[
           { title: "编码", dataIndex: "tenantCode", width: 140 },
           { title: "名称", dataIndex: "name" },

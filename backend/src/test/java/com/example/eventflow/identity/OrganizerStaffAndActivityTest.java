@@ -185,7 +185,7 @@ class OrganizerStaffAndActivityTest {
     mockMvc
         .perform(get("/api/platform/reviews").header("Authorization", "Bearer " + platform))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data[*].id", hasItems(activityId)));
+        .andExpect(jsonPath("$.data.items[*].id", hasItems(activityId)));
 
     mockMvc
         .perform(

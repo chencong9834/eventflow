@@ -19,6 +19,9 @@ import com.example.eventflow.payment.Payment;
 import com.example.eventflow.payment.PaymentMapper;
 import com.example.eventflow.refund.TicketRefund;
 import com.example.eventflow.refund.TicketRefundMapper;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
+import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
 import com.example.eventflow.shared.id.SnowflakeIdGenerator;
@@ -103,14 +106,16 @@ public class OrderService {
     this.clock = clock;
   }
 
-  public List<OrderResponse> listMine(AuthPrincipal principal) {
+  public PageResult<OrderResponse> listMine(AuthPrincipal principal, PageQuery page) {
     requireBuyer(principal);
-    return orderMapper.findByBuyer(principal.getUserId()).stream().map(this::toResponse).toList();
+    return PageSupport.query(
+        page, () -> orderMapper.findByBuyer(principal.getUserId()), this::toResponse);
   }
 
-  public List<OrderResponse> listTenant(AuthPrincipal principal) {
+  public PageResult<OrderResponse> listTenant(AuthPrincipal principal, PageQuery page) {
     requireOrganizer(principal);
-    return orderMapper.findByTenant(principal.getTenantId()).stream().map(this::toResponse).toList();
+    return PageSupport.query(
+        page, () -> orderMapper.findByTenant(principal.getTenantId()), this::toResponse);
   }
 
   public OrderResponse getBuyer(AuthPrincipal principal, Long orderId) {
@@ -131,9 +136,10 @@ public class OrderService {
     return toResponse(order);
   }
 
-  public List<TicketResponse> listBuyerTickets(AuthPrincipal principal) {
+  public PageResult<TicketResponse> listBuyerTickets(AuthPrincipal principal, PageQuery page) {
     requireBuyer(principal);
-    return ticketMapper.findByBuyer(principal.getUserId()).stream().map(this::toTicket).toList();
+    return PageSupport.query(
+        page, () -> ticketMapper.findByBuyer(principal.getUserId()), this::toTicket);
   }
 
   @Transactional
@@ -306,12 +312,15 @@ public class OrderService {
     return toResponse(requireOrder(orderId));
   }
 
-  public List<OrderResponse> listPlatform(AuthPrincipal principal, Instant from, Instant to) {
+  public PageResult<OrderResponse> listPlatform(
+      AuthPrincipal principal, Instant from, Instant to, PageQuery page) {
     requirePlatform(principal);
     if (from == null || to == null || !to.isAfter(from)) {
       throw new BizException(ErrorCode.BAD_REQUEST, "必须提供有效时间范围", HttpStatus.BAD_REQUEST);
     }
-    return orderMapper.findInRange(Utc.from(from), Utc.from(to)).stream().map(this::toResponse).toList();
+    LocalDateTime start = Utc.from(from);
+    LocalDateTime end = Utc.from(to);
+    return PageSupport.query(page, () -> orderMapper.findInRange(start, end), this::toResponse);
   }
 
   public OrderResponse getPlatform(AuthPrincipal principal, Long orderId) {

@@ -2,10 +2,11 @@ package com.example.eventflow.order.web;
 
 import com.example.eventflow.order.OrderService;
 import com.example.eventflow.shared.api.ApiResponse;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.security.AuthPrincipal;
 import jakarta.validation.Valid;
 import java.time.Instant;
-import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,8 +36,11 @@ public class OrderController {
 
   @PreAuthorize("hasAuthority('order:write')")
   @GetMapping("/buyer/orders")
-  public ApiResponse<List<OrderResponse>> myOrders(@AuthenticationPrincipal AuthPrincipal principal) {
-    return ApiResponse.ok(orderService.listMine(principal));
+  public ApiResponse<PageResult<OrderResponse>> myOrders(
+      @AuthenticationPrincipal AuthPrincipal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(orderService.listMine(principal, PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAuthority('order:write')")
@@ -64,15 +68,20 @@ public class OrderController {
 
   @PreAuthorize("hasAuthority('ticket:read')")
   @GetMapping("/buyer/tickets")
-  public ApiResponse<List<OrderResponse.TicketResponse>> myTickets(
-      @AuthenticationPrincipal AuthPrincipal principal) {
-    return ApiResponse.ok(orderService.listBuyerTickets(principal));
+  public ApiResponse<PageResult<OrderResponse.TicketResponse>> myTickets(
+      @AuthenticationPrincipal AuthPrincipal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(orderService.listBuyerTickets(principal, PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAuthority('order:read')")
   @GetMapping("/organizer/orders")
-  public ApiResponse<List<OrderResponse>> tenantOrders(@AuthenticationPrincipal AuthPrincipal principal) {
-    return ApiResponse.ok(orderService.listTenant(principal));
+  public ApiResponse<PageResult<OrderResponse>> tenantOrders(
+      @AuthenticationPrincipal AuthPrincipal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(orderService.listTenant(principal, PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAuthority('order:read')")
@@ -98,9 +107,13 @@ public class OrderController {
 
   @PreAuthorize("hasAuthority('order:read')")
   @GetMapping("/platform/orders")
-  public ApiResponse<List<OrderResponse>> platformOrders(
-      @AuthenticationPrincipal AuthPrincipal principal, @RequestParam Instant from, @RequestParam Instant to) {
-    return ApiResponse.ok(orderService.listPlatform(principal, from, to));
+  public ApiResponse<PageResult<OrderResponse>> platformOrders(
+      @AuthenticationPrincipal AuthPrincipal principal,
+      @RequestParam Instant from,
+      @RequestParam Instant to,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(orderService.listPlatform(principal, from, to, PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAuthority('order:read')")

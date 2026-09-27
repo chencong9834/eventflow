@@ -135,7 +135,7 @@ class CommerceFlowTest {
     mockMvc
         .perform(get("/api/catalog/activities").header("Authorization", "Bearer " + buyer))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data[0].id").value(activityId));
+        .andExpect(jsonPath("$.data.items[0].id").value(activityId));
 
     MvcResult ordered =
         mockMvc

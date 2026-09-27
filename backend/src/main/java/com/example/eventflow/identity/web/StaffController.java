@@ -2,6 +2,8 @@ package com.example.eventflow.identity.web;
 
 import com.example.eventflow.identity.StaffService;
 import com.example.eventflow.shared.api.ApiResponse;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.security.AuthPrincipal;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,8 +30,11 @@ public class StaffController {
 
   @PreAuthorize("hasAuthority('user:write')")
   @GetMapping("/staff")
-  public ApiResponse<List<StaffUserResponse>> list(@AuthenticationPrincipal AuthPrincipal principal) {
-    return ApiResponse.ok(staffService.list(principal));
+  public ApiResponse<PageResult<StaffUserResponse>> list(
+      @AuthenticationPrincipal AuthPrincipal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(staffService.list(principal, PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAuthority('user:write')")

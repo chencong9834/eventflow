@@ -7,6 +7,9 @@ import com.example.eventflow.iam.SysRoleMapper;
 import com.example.eventflow.activity.ActivityService;
 import com.example.eventflow.identity.SysUser;
 import com.example.eventflow.identity.SysUserMapper;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
+import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
 import com.example.eventflow.shared.id.SnowflakeIdGenerator;
@@ -61,12 +64,8 @@ public class TenantService {
     this.activityService = activityService;
   }
 
-  public List<TenantSummaryResponse> listAll() {
-    List<TenantSummaryResponse> rows = new ArrayList<>();
-    for (SysTenant tenant : tenantMapper.findAll()) {
-      rows.add(toSummary(tenant));
-    }
-    return rows;
+  public PageResult<TenantSummaryResponse> listAll(PageQuery page) {
+    return PageSupport.query(page, tenantMapper::findAll, this::toSummary);
   }
 
   public SysTenant findById(Long id) {
@@ -102,7 +101,7 @@ public class TenantService {
 
   public PlatformOverviewResponse overview() {
     PlatformOverviewResponse dto = new PlatformOverviewResponse();
-    dto.setTenantTotal(tenantMapper.findAll().size());
+    dto.setTenantTotal(tenantMapper.countAll());
     dto.setOrganizerActive(tenantMapper.countByTypeAndStatus(TYPE_ORGANIZER, STATUS_ACTIVE));
     dto.setOrganizerDisabled(tenantMapper.countByTypeAndStatus(TYPE_ORGANIZER, STATUS_DISABLED));
     dto.setUserTotal(userMapper.countAll());

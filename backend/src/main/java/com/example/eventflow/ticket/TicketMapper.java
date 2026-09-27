@@ -22,7 +22,12 @@ public interface TicketMapper {
   @Select("SELECT * FROM ticket WHERE order_id = #{orderId} ORDER BY id")
   List<Ticket> findByOrderId(@Param("orderId") Long orderId);
 
-  @Select("SELECT * FROM ticket WHERE buyer_user_id = #{buyerUserId} ORDER BY id DESC")
+  @Select(
+      """
+      SELECT * FROM ticket
+      WHERE buyer_user_id = #{buyerUserId}
+      ORDER BY id DESC
+      """)
   List<Ticket> findByBuyer(@Param("buyerUserId") Long buyerUserId);
 
   @Select("SELECT * FROM ticket WHERE verify_code = #{verifyCode}")

@@ -5,7 +5,8 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { http, ApiError } from "../../shared/http";
-import type { ApiResponse, StaffRole, StaffUser } from "../../shared/types";
+import { listPagination } from "../../shared/page";
+import type { ApiResponse, PageResult, StaffRole, StaffUser } from "../../shared/types";
 
 const resetSchema = z.object({
   password: z.string().min(8, "密码至少 8 位").max(72, "密码过长")
@@ -27,10 +28,14 @@ export function StaffPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [resetId, setResetId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
   const staff = useQuery({
-    queryKey: ["organizer", "staff"],
+    queryKey: ["organizer", "staff", page, size],
     queryFn: async () => {
-      const res = (await http.get("/organizer/staff")) as ApiResponse<StaffUser[]>;
+      const res = (await http.get("/organizer/staff", { params: { page, size } })) as ApiResponse<
+        PageResult<StaffUser>
+      >;
       return res.data;
     }
   });
@@ -88,7 +93,11 @@ export function StaffPage() {
       <Table
         rowKey="id"
         loading={staff.isLoading}
-        dataSource={staff.data ?? []}
+        dataSource={staff.data?.items ?? []}
+        pagination={listPagination(page, size, staff.data?.total ?? 0, (nextPage, nextSize) => {
+          setPage(nextPage);
+          setSize(nextSize);
+        })}
         columns={[
           { title: "用户名", dataIndex: "username" },
           { title: "姓名", dataIndex: "displayName" },

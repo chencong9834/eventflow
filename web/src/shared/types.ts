@@ -173,3 +173,10 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
 }
+
+export interface PageResult<T> {
+  items: T[];
+  page: number;
+  size: number;
+  total: number;
+}

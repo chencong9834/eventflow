@@ -1,20 +1,25 @@
-import { Button, Card, Col, Empty, Row, Tag, Typography } from "antd";
+import { Button, Card, Col, Empty, Pagination, Row, Tag, Typography } from "antd";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http } from "../../shared/http";
-import type { ActivitySummary, ApiResponse } from "../../shared/types";
+import type { ActivitySummary, ApiResponse, PageResult } from "../../shared/types";
 import { CoverImage } from "../../shared/CoverImage";
 
 export function CatalogPage() {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
   const query = useQuery({
-    queryKey: ["catalog", "activities"],
+    queryKey: ["catalog", "activities", page, size],
     queryFn: async () => {
-      const res = (await http.get("/catalog/activities")) as ApiResponse<ActivitySummary[]>;
+      const res = (await http.get("/catalog/activities", { params: { page, size } })) as ApiResponse<
+        PageResult<ActivitySummary>
+      >;
       return res.data;
     }
   });
-  const items = query.data ?? [];
+  const items = query.data?.items ?? [];
 
   return (
     <div>
@@ -61,6 +66,20 @@ export function CatalogPage() {
           ))}
         </Row>
       )}
+      {(query.data?.total ?? 0) > 0 ? (
+        <Pagination
+          style={{ marginTop: 16, textAlign: "right" }}
+          current={page}
+          pageSize={size}
+          total={query.data?.total ?? 0}
+          showSizeChanger
+          pageSizeOptions={["10", "20", "50", "100"]}
+          onChange={(nextPage, nextSize) => {
+            setPage(nextSize === size ? nextPage : 1);
+            setSize(nextSize);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

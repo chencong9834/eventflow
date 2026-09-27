@@ -7,6 +7,9 @@ import com.example.eventflow.identity.web.CreateStaffRequest;
 import com.example.eventflow.identity.web.StaffRoleResponse;
 import com.example.eventflow.identity.web.StaffUserResponse;
 import com.example.eventflow.identity.web.UpdateStaffRequest;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
+import com.example.eventflow.shared.api.PageSupport;
 import com.example.eventflow.shared.error.BizException;
 import com.example.eventflow.shared.error.ErrorCode;
 import com.example.eventflow.shared.id.SnowflakeIdGenerator;
@@ -42,13 +45,10 @@ public class StaffService {
     this.passwordEncoder = passwordEncoder;
   }
 
-  public List<StaffUserResponse> list(AuthPrincipal principal) {
+  public PageResult<StaffUserResponse> list(AuthPrincipal principal, PageQuery page) {
     requireOrganizer(principal);
-    List<StaffUserResponse> rows = new ArrayList<>();
-    for (SysUser user : userMapper.findSummariesByTenantId(principal.getTenantId())) {
-      rows.add(toResponse(user));
-    }
-    return rows;
+    return PageSupport.query(
+        page, () -> userMapper.findSummariesByTenantId(principal.getTenantId()), StaffService::toResponse);
   }
 
   public List<StaffRoleResponse> roles(AuthPrincipal principal) {

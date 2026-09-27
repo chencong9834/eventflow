@@ -3,9 +3,10 @@ package com.example.eventflow.activity.web;
 import com.example.eventflow.activity.ActivityService;
 import com.example.eventflow.activity.web.ActivitySummaryResponse.ActivityDetailResponse;
 import com.example.eventflow.shared.api.ApiResponse;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.security.AuthPrincipal;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +29,11 @@ public class PlatformReviewController {
 
   @PreAuthorize("hasAnyAuthority('review:write','tenant:read')")
   @GetMapping
-  public ApiResponse<List<ActivitySummaryResponse>> list(
-      @RequestParam(required = false, defaultValue = "PENDING") String status) {
-    return ApiResponse.ok(activityService.listForReview(status));
+  public ApiResponse<PageResult<ActivitySummaryResponse>> list(
+      @RequestParam(required = false, defaultValue = "PENDING") String status,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(activityService.listForReview(status, PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAnyAuthority('review:write','tenant:read')")

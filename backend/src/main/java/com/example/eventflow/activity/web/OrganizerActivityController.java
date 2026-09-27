@@ -3,9 +3,10 @@ package com.example.eventflow.activity.web;
 import com.example.eventflow.activity.ActivityService;
 import com.example.eventflow.activity.web.ActivitySummaryResponse.ActivityDetailResponse;
 import com.example.eventflow.shared.api.ApiResponse;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
 import com.example.eventflow.shared.security.AuthPrincipal;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,9 +31,11 @@ public class OrganizerActivityController {
   @PreAuthorize(
       "hasAnyAuthority('activity:write','order:read','ticket:verify','report:read','refund:write')")
   @GetMapping("/activities")
-  public ApiResponse<List<ActivitySummaryResponse>> list(
-      @AuthenticationPrincipal AuthPrincipal principal) {
-    return ApiResponse.ok(activityService.listMine(principal));
+  public ApiResponse<PageResult<ActivitySummaryResponse>> list(
+      @AuthenticationPrincipal AuthPrincipal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(activityService.listMine(principal, PageQuery.of(page, size)));
   }
 
   @PreAuthorize(

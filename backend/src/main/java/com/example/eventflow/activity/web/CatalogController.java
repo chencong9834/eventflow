@@ -3,8 +3,10 @@ package com.example.eventflow.activity.web;
 import com.example.eventflow.activity.ActivityService;
 import com.example.eventflow.activity.web.ActivitySummaryResponse.ActivityDetailResponse;
 import com.example.eventflow.shared.api.ApiResponse;
-import java.util.List;
+import com.example.eventflow.shared.api.PageQuery;
+import com.example.eventflow.shared.api.PageResult;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +24,9 @@ public class CatalogController {
 
   @PreAuthorize("hasAuthority('catalog:read')")
   @GetMapping("/activities")
-  public ApiResponse<List<ActivitySummaryResponse>> list() {
-    return ApiResponse.ok(activityService.listCatalog());
+  public ApiResponse<PageResult<ActivitySummaryResponse>> list(
+      @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+    return ApiResponse.ok(activityService.listCatalog(PageQuery.of(page, size)));
   }
 
   @PreAuthorize("hasAuthority('catalog:read')")
